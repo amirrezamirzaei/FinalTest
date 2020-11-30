@@ -9,11 +9,14 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageView;
 
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+
+import com.bumptech.glide.Glide;
 
 import org.osmdroid.api.IMapController;
 import org.osmdroid.config.Configuration;
@@ -30,6 +33,7 @@ public class MainActivity extends Activity {
     private MapView map = null;
     IMapController mapController;
     static Location location;
+    ImageView loadingGif;
 
 
     @Override
@@ -49,32 +53,22 @@ public class MainActivity extends Activity {
         }
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 30000, 10, mLocationListener);
 
-
-
-
         //load/initialize the osmdroid configuration, this can be done
         Configuration.getInstance().setUserAgentValue(BuildConfig.APPLICATION_ID);
         Context ctx = getApplicationContext();
         //Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx));
         setContentView(R.layout.activity_main);
-
+        loadingGif = findViewById(R.id.mapLoad);
+        Glide.with(this).load(R.drawable.loading).into(loadingGif);
         map = (MapView) findViewById(R.id.map);
         map.setTileSource(TileSourceFactory.MAPNIK);
-
+        map.setVisibility(View.INVISIBLE);
         requestPermissionsIfNecessary(new String[]{
                 Manifest.permission.WRITE_EXTERNAL_STORAGE
         });
-
-
         map.setMultiTouchControls(true);
-
-
         mapController = map.getController();
         mapController.setZoom(18);
-        GeoPoint startPoint = new GeoPoint(35.689198, 51.388973);
-        mapController.setCenter(startPoint);
-
-
     }
 
     @Override
@@ -129,6 +123,8 @@ public class MainActivity extends Activity {
             mapController.setCenter(startPoint);
             setIcon(startPoint);
             MainActivity.location=location;
+            map.setVisibility(View.VISIBLE);
+            loadingGif.setVisibility(View.INVISIBLE);
         }
 
         Marker startMarker;
